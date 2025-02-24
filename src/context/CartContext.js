@@ -7,6 +7,12 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
 
+  const clearCart = async () => {
+    setCartItems([]); // Reset cart items
+    setTotalPrice(0); // Reset total price
+    await AsyncStorage.removeItem("cart"); // Clear AsyncStorage
+  };
+
   useEffect(() => {
     loadCartItems();
   }, []);
@@ -44,11 +50,14 @@ export const CartProvider = ({ children }) => {
     totalSum = totalSum.toFixed(2);
     setTotalPrice(totalSum);
   };
+
   const value = {
     cartItems,
     addToCartItem,
     deleteCartItem,
     totalPrice,
+    clearCart, // ✅ Added here
   };
+
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };

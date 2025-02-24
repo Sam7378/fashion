@@ -2,7 +2,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { fonts } from "../utils/fonts";
 
-const CartCard = ({ item, handleDelete }) => {
+const CartCard = ({ item, handleDelete, showDeleteIcon = true }) => {
   const imageUrl =
     "https://res.cloudinary.com/dlc5c1ycl/image/upload/v1710567613/cwlk21f74nd9iamrlzkh.png";
   return (
@@ -20,12 +20,14 @@ const CartCard = ({ item, handleDelete }) => {
           </View>
         </View>
       </View>
-      <TouchableOpacity onPress={() => handleDelete(item.id)}>
-        <Image
-          source={require("../assets/deleteIcon.png")}
-          style={styles.deleteIcon}
-        />
-      </TouchableOpacity>
+      {showDeleteIcon && (
+        <TouchableOpacity onPress={() => handleDelete(item.id)}>
+          <Image
+            source={require("../assets/deleteIcon.png")}
+            style={styles.deleteIcon}
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

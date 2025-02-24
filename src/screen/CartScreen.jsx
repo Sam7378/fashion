@@ -11,13 +11,46 @@ import Header from "../components/Header";
 import CartCard from "../components/CartCard";
 import { fonts } from "../utils/fonts";
 import { CartContext } from "../context/CartContext";
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CartScreen = () => {
-  const { cartItems, deleteCartItem, totalPrice } = useContext(CartContext);
+  const { cartItems, deleteCartItem, totalPrice, clearCart } =
+    useContext(CartContext);
+  const navigation = useNavigation();
 
   const handleDeleteItem = async (id) => {
-    await deleteCartItem(id);
+    try {
+      await deleteCartItem(id);
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    }
   };
+
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+
+    const orderDetails = {
+      id: new Date().getTime(),
+      items: cartItems,
+      totalPrice: totalPrice,
+      address: "User's saved address", // Update with actual address logic
+    };
+
+    try {
+      await AsyncStorage.setItem("orderDetails", JSON.stringify(orderDetails));
+
+      clearCart();
+
+      // navigation.navigate("Payment", { totalPrice });
+    } catch (error) {
+      console.error("Error saving order:", error);
+    }
+  };
+
   return (
     <LinearGradient colors={["#f0d58b", "#edede9"]} style={styles.container}>
       <View style={styles.header}>
@@ -28,8 +61,11 @@ const CartScreen = () => {
         renderItem={({ item }) => (
           <CartCard item={item} handleDelete={handleDeleteItem} />
         )}
+        keyExtractor={(item) => item.id.toString()}
+        windowSize={5}
+        initialNumToRender={10}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ marginTop: 40, paddingBottom: 200 }}
+        contentContainerStyle={{ marginTop: 40, paddingBottom: 100 }}
         ListFooterComponent={
           <>
             <View style={styles.bottomContentContainer}>
@@ -38,7 +74,7 @@ const CartScreen = () => {
                 <Text style={styles.priceText}>₹{totalPrice}</Text>
               </View>
               <View style={styles.flexRowContainer}>
-                <Text style={styles.titleText}>Shpping:</Text>
+                <Text style={styles.titleText}>Shipping:</Text>
                 <Text style={styles.priceText}>₹0.0</Text>
               </View>
               <View style={styles.divider} />
@@ -49,7 +85,10 @@ const CartScreen = () => {
                 </Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("Pament", { totalPrice })}
+            >
               <Text style={styles.buttonText}>Checkout</Text>
             </TouchableOpacity>
           </>
@@ -63,6 +102,7 @@ export default CartScreen;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 15,
   },
   header: {},

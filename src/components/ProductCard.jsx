@@ -6,9 +6,7 @@ const ProductCard = ({ item, handleProductClick, toggleFavorite }) => {
   return (
     <TouchableOpacity
       style={styles.container}
-      onPress={() => {
-        handleProductClick(item);
-      }}
+      onPress={() => handleProductClick(item)}
     >
       <Image source={{ uri: item.image }} style={styles.coverImage} />
       <View style={styles.contentContainer}>
@@ -16,22 +14,15 @@ const ProductCard = ({ item, handleProductClick, toggleFavorite }) => {
         <Text style={styles.price}>₹{item.price}</Text>
       </View>
       <View style={styles.likeContainer}>
-        <TouchableOpacity
-          onPress={() => {
-            toggleFavorite(item);
-          }}
-        >
-          {item.isFavorite ? (
-            <Image
-              source={require("../assets/favoriteFilled.png")}
-              style={styles.faviorate}
-            />
-          ) : (
-            <Image
-              source={require("../assets/favorite.png")}
-              style={styles.faviorate}
-            />
-          )}
+        <TouchableOpacity onPress={() => toggleFavorite(item)}>
+          <Image
+            source={
+              item.isFavorite
+                ? require("../assets/favoriteFilled.png")
+                : require("../assets/favorite.png")
+            }
+            style={styles.favorite}
+          />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -50,7 +41,6 @@ const styles = StyleSheet.create({
     height: 256,
     width: "100%",
     borderRadius: 20,
-    position: "relative",
   },
   contentContainer: {
     padding: 10,
@@ -73,7 +63,7 @@ const styles = StyleSheet.create({
     right: 10,
     top: 10,
   },
-  faviorate: {
+  favorite: {
     height: 20,
     width: 20,
   },

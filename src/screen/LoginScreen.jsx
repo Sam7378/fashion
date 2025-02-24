@@ -18,19 +18,52 @@ import {
   openSettings,
 } from "react-native-permissions";
 
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 const LoginScreen = ({ navigation, setIsLoggedIn }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    if (email && password) {
-      await AsyncStorage.setItem("userToken", "valid_token");
-      setIsLoggedIn(true);
-    } else {
-      Alert.alert("Error", "Please Enter Email and Password!");
+    if (!email && !password) {
+      Alert.alert("Error", "Please Enter Email and Password");
+      return;
     }
-    requestLocationPermission();
+    if (!validateEmail(email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address");
+      return;
+    }
+    if (password.trim() === "") {
+      Alert.alert("Missing Password", "Please enter your password");
+      return;
+    }
+
+    const storedEmail = (await AsyncStorage.getItem("userEmail")) ?? "";
+    const storedPassword = (await AsyncStorage.getItem("userPassword")) ?? "";
+    if (email === storedEmail && password === storedPassword) {
+      await AsyncStorage.setItem("userToken", "validToken");
+
+      setIsLoggedIn(true);
+      Alert.alert("Success", "Login Successful");
+
+      requestLocationPermission();
+    } else {
+      Alert.alert("Error", "Invalid Email or Password");
+    }
   };
+  //   if (email && password) {
+  //     await AsyncStorage.setItem("userToken", "valid_token");
+  //     setIsLoggedIn(true);
+  //   } else {
+  //     Alert.alert("Error", "Please Enter Email and Password!");
+  //   }
+  //   if (setIsLoggedIn === "true") {
+  //   }
+  //   requestLocationPermission();
+  // };
   const requestLocationPermission = async () => {
     const result = await request(
       Platform.OS === "ios"

@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState } from "react";
 import {
   View,
@@ -6,6 +7,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -15,11 +17,32 @@ const SignUpScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignUp = () => {
-    alert("Account Created Successfully!");
-    navigation.navigate("LOGIN");
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
+  const handleSignUp = async () => {
+    if (!username.trim() || !email.trim() || !password.trim()) {
+      Alert.alert("Error", "All fields are required!");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      Alert.alert("Error", "Invalid email format!");
+      return;
+    }
+
+    try {
+      await AsyncStorage.setItem("userName", username);
+      await AsyncStorage.setItem("userEmail", email);
+      await AsyncStorage.setItem("userPassword", password);
+      Alert.alert("Success", "Account Created Successfully!");
+      navigation.navigate("LOGIN");
+    } catch (error) {
+      console.error("Error saving user data:", error);
+    }
+  };
   return (
     <ImageBackground
       source={require("../assets/signup.jpg")}
@@ -46,6 +69,7 @@ const SignUpScreen = ({ navigation }) => {
             onChangeText={setEmail}
             style={styles.input}
             keyboardType="email-address"
+            autoCapitalize="none"
           />
         </View>
 
@@ -66,7 +90,12 @@ const SignUpScreen = ({ navigation }) => {
           </LinearGradient>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("LOGIN")}>
+        <TouchableOpacity
+          onPress={() => {
+            console.log("login");
+            navigation.navigate("LOGIN");
+          }}
+        >
           <Text style={styles.loginText}>
             Already have an account? <Text style={styles.loginLink}>Login</Text>
           </Text>
@@ -82,6 +111,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.9)",
     padding: 30,
     borderRadius: 10,
+    width: "82%",
   },
   title: {
     fontSize: 26,

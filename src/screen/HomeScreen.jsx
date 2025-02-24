@@ -5,19 +5,24 @@ import {
   Text,
   TextInput,
   View,
+  TouchableOpacity,
+  Animated,
 } from "react-native";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import LinearGradient from "react-native-linear-gradient";
-import Header from "../components/Header";
+import { useNavigation } from "@react-navigation/native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import SliderBanner from "./SliderBanner";
+import AddressHome from "./AddressHome";
 import Tags from "../components/Tags";
 import ProductCard from "../components/ProductCard";
 import data from "../data/data.json";
-import { useNavigation } from "@react-navigation/native";
 
 const HomeScreen = () => {
   const [searchItem, setSearchItem] = useState("");
   const [products, setProducts] = useState(data.products);
   const navigation = useNavigation();
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   const handleProductDetails = useCallback(
     (item) => {
@@ -43,42 +48,72 @@ const HomeScreen = () => {
 
   return (
     <LinearGradient colors={["#FDF0F3", "#FFFBFC"]} style={styles.container}>
-      <FlatList
-        ListHeaderComponent={
-          <>
-            <Header />
-            <View>
-              <Text style={styles.headingText}>Match Your Style</Text>
-              <View style={styles.inputContainer}>
-                <Image
-                  source={require("../assets/search.png")}
-                  style={styles.searchIcon}
-                />
-                <TextInput
-                  placeholder="Search"
-                  style={styles.textInput}
-                  placeholderTextColor="#000000"
-                  onChangeText={setSearchItem}
-                  state
-                  value={searchItem}
-                />
-              </View>
-            </View>
-            <Tags />
-          </>
-        }
-        data={filteredLists}
-        numColumns={2}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <ProductCard
-            item={item}
-            handleProductClick={handleProductDetails}
-            toggleFavorite={toggleFavorite}
-          />
+      {/* Header Section */}
+      <View style={styles.headerContainer}>
+        <TouchableOpacity
+          style={styles.drawerIcon}
+          onPress={() => navigation.openDrawer()}
+        >
+          <Ionicons name="grid" size={25} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.headingText}>Match Your Style</Text>
+        <TouchableOpacity
+          style={styles.bellIcon}
+          onPress={() => console.log("Bell icon pressed")}
+        >
+          <Ionicons name="notifications-outline" size={32} color="black" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <Image
+          source={require("../assets/search.png")}
+          style={styles.searchIcon}
+        />
+        <TextInput
+          placeholder="Search"
+          style={styles.textInput}
+          placeholderTextColor="#000000"
+          onChangeText={setSearchItem}
+          value={searchItem}
+        />
+      </View>
+
+      {/* Animated ScrollView */}
+      <Animated.ScrollView
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
         )}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-      />
+      >
+        {/* Address Bar with Animation */}
+        <AddressHome scrollY={scrollY} />
+
+        {/* Slider Banner */}
+        <SliderBanner />
+
+        {/* Tags Section */}
+        <Tags />
+
+        {/* Product List */}
+        <FlatList
+          data={filteredLists}
+          numColumns={2}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <ProductCard
+              item={item}
+              handleProductClick={handleProductDetails}
+              toggleFavorite={toggleFavorite}
+            />
+          )}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 50 }}
+        />
+      </Animated.ScrollView>
     </LinearGradient>
   );
 };
@@ -90,13 +125,19 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  headingText: {
-    fontSize: 28,
-    color: "#000000",
-    marginVertical: 20,
-    fontFamily: "Poppins-Regular",
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
   },
-  inputContainer: {
+  headingText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    flex: 1,
+  },
+  searchContainer: {
     width: "100%",
     backgroundColor: "#FFFFFF",
     height: 48,
@@ -104,16 +145,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     paddingHorizontal: 12,
-  },
-  searchIcon: {
-    height: 26,
-    width: 26,
-    marginRight: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    marginBottom: 10,
   },
   textInput: {
-    fontSize: 18,
-    fontFamily: "Poppins-Regular",
+    fontSize: 16,
     color: "black",
     flex: 1,
+  },
+  drawerIcon: {
+    paddingLeft: 10,
+  },
+  bellIcon: {
+    paddingRight: 10,
+  },
+  searchIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
   },
 });

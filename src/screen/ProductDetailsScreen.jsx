@@ -6,6 +6,8 @@ import { fonts } from "../utils/fonts";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { addToCart } from "../utils/helper";
 import { CartContext } from "../context/CartContext";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import SliderBanner from "./SliderBanner";
 
 const colorsArray = [
   "#91A1B0",
@@ -23,8 +25,6 @@ const ProductDetailsScreen = () => {
   const product = route.params.item;
   const [selectedSize, setSelectedSize] = useState("M");
   const [selectedColor, setSelectedColor] = useState("#B11D1D");
-  const imageUrl =
-    "https://res.cloudinary.com/dlc5c1ycl/image/upload/v1710567613/vulb5bckiruhpzt2v8ec.png";
 
   const handleAddToCart = () => {
     product.color = selectedColor;
@@ -35,8 +35,14 @@ const ProductDetailsScreen = () => {
   return (
     <LinearGradient colors={["#66787d", "#cfdcdf"]} style={styles.container}>
       <View style={styles.header}>
-        <Header />
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
       </View>
+      {/* <SliderBanner style={styles.sliderBanner} /> */}
       <View style={styles.imageContainer}>
         <Image source={{ uri: product.image }} style={styles.coverImage} />
       </View>
@@ -48,84 +54,46 @@ const ProductDetailsScreen = () => {
         <Text style={[styles.fontText, styles.sizeText]}>Size</Text>
         {/* size container */}
         <View style={styles.sizeContainer}>
-          <TouchableOpacity
-            style={styles.sizeValueContainer}
-            onPress={() => setSelectedSize("S")}
-          >
-            <Text
-              style={[
-                styles.sizeValueText,
-                selectedSize === "S" && styles.selectedText,
-              ]}
+          {["S", "M", "L", "XL"].map((size) => (
+            <TouchableOpacity
+              key={size}
+              style={styles.sizeValueContainer}
+              onPress={() => setSelectedSize(size)}
             >
-              S
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.sizeValueContainer}
-            onPress={() => setSelectedSize("M")}
-          >
-            <Text
-              style={[
-                styles.sizeValueText,
-                selectedSize === "M" && styles.selectedText,
-              ]}
-            >
-              M
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.sizeValueContainer}
-            onPress={() => setSelectedSize("L")}
-          >
-            <Text
-              style={[
-                styles.sizeValueText,
-                selectedSize === "L" && styles.selectedText,
-              ]}
-            >
-              L
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.sizeValueContainer}
-            onPress={() => setSelectedSize("XL")}
-          >
-            <Text
-              style={[
-                styles.sizeValueText,
-                selectedSize === "XL" && styles.selectedText,
-              ]}
-            >
-              XL
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[
+                  styles.sizeValueText,
+                  selectedSize === size && styles.selectedText,
+                ]}
+              >
+                {size}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
         {/* color container */}
         <View style={styles.colorContainer}>
-          {colorsArray.map((color, index) => {
-            return (
-              <TouchableOpacity
-                key={index}
-                onPress={() => setSelectedColor(color)}
+          {colorsArray.map((color, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => setSelectedColor(color)}
+            >
+              <View
+                style={[
+                  styles.borderColorCircle,
+                  selectedColor === color && {
+                    borderColor: color,
+                    borderWidth: 2,
+                    borderRadius: 24,
+                  },
+                ]}
               >
                 <View
-                  style={[
-                    styles.borderColorCircle,
-                    selectedColor === color && {
-                      borderColor: color,
-                      borderWidth: 2,
-                      borderRadius: 24,
-                    },
-                  ]}
-                >
-                  <View
-                    style={[styles.colorCircle, { backgroundColor: color }]}
-                  ></View>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+                  style={[styles.colorCircle, { backgroundColor: color }]}
+                ></View>
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
         {/* cart button */}
         <View>
@@ -145,7 +113,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
+    flexDirection: "row",
+    alignItems: "center",
     padding: 8,
+  },
+  backButton: {
+    marginRight: 10,
+  },
+  sliderBanner: {
+    height: 30,
+    width: "10%",
   },
   imageContainer: {
     height: 420,
@@ -166,7 +143,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: fonts.regular,
     fontWeight: "700",
-    color: "#444444",
     color: "#444444",
   },
   sizeText: {
