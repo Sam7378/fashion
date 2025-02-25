@@ -22,6 +22,9 @@ import AddressScreen from "./src/screen/AddressScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import PaymentScreen from "./src/screen/PamentScreen";
 import FeedbackScreen from "./src/screen/FeedbackScreen";
+import NotificationScreen from "./src/screen/NoticicationScreen";
+import ShareModal from "./src/components/ShareModal";
+import PrivatePolicy from "./src/components/PrivatePolicy";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -192,6 +195,9 @@ const App = () => {
             <Stack.Screen name="Address" component={AddressScreen} />
             <Stack.Screen name="Pament" component={PaymentScreen} />
             <Stack.Screen name="Feedback" component={FeedbackScreen} />
+            <Stack.Screen name="Notification" component={NotificationScreen} />
+            <Stack.Screen name="ShareModal" component={ShareModal} />
+            <Stack.Screen name="Policy" component={PrivatePolicy} />
           </Stack.Navigator>
         </NavigationContainer>
       </CartProvider>

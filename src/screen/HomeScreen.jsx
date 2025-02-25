@@ -59,7 +59,7 @@ const HomeScreen = () => {
         <Text style={styles.headingText}>Match Your Style</Text>
         <TouchableOpacity
           style={styles.bellIcon}
-          onPress={() => console.log("Bell icon pressed")}
+          onPress={() => navigation.navigate("Notification")}
         >
           <Ionicons name="notifications-outline" size={32} color="black" />
         </TouchableOpacity>
@@ -80,7 +80,6 @@ const HomeScreen = () => {
         />
       </View>
 
-      {/* Animated ScrollView */}
       <Animated.ScrollView
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -89,16 +88,12 @@ const HomeScreen = () => {
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        {/* Address Bar with Animation */}
         <AddressHome scrollY={scrollY} />
 
-        {/* Slider Banner */}
         <SliderBanner />
 
-        {/* Tags Section */}
-        <Tags />
+        {/* <Tags /> */}
 
-        {/* Product List */}
         <FlatList
           data={filteredLists}
           numColumns={2}

@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ScrollView,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
@@ -24,6 +31,7 @@ const HelpSupportScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -34,46 +42,61 @@ const HelpSupportScreen = () => {
         <Text style={styles.headerTitle}>Customer Support</Text>
       </View>
 
-      <View style={styles.iconPlaceholder}>
-        <Image
-          source={require("../assets/help.png")}
-          style={styles.futureIcon}
-        />
-      </View>
-
-      <View style={styles.wrapContact}>
-        <Text style={styles.contactText}>Contact us</Text>
-      </View>
-
-      <TouchableOpacity style={styles.card} onPress={() => handlePress("mail")}>
-        <View style={styles.cardLeft}>
-          <Ionicons name="mail-outline" style={styles.cardIcon} />
-          <Text style={styles.iconText}>Mail</Text>
-        </View>
-        <Text style={styles.cardMiddleText}>Mail Support</Text>
-        <Ionicons name="chevron-forward" style={styles.cardArrow} />
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => handlePress("whatsapp")}
+      {/* Scrollable Content */}
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={{ paddingBottom: 30 }}
+        keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.cardLeft}>
-          <Ionicons name="logo-whatsapp" style={styles.cardIcon} />
-          <Text style={styles.iconText}>WhatsApp</Text>
+        {/* Icon */}
+        <View style={styles.iconPlaceholder}>
+          <Image
+            source={require("../assets/help.png")}
+            style={styles.futureIcon}
+          />
         </View>
-        <Text style={styles.cardMiddleText}>WhatsApp Support</Text>
-        <Ionicons name="chevron-forward" style={styles.cardArrow} />
-      </TouchableOpacity>
 
-      <TouchableOpacity style={styles.card} onPress={() => handlePress("call")}>
-        <View style={styles.cardLeft}>
-          <Ionicons name="call-outline" style={styles.cardIcon} />
-          <Text style={styles.iconText}>Call</Text>
+        <View style={styles.wrapContact}>
+          <Text style={styles.contactText}>Contact us</Text>
         </View>
-        <Text style={styles.cardMiddleText}>Call Support</Text>
-        <Ionicons name="chevron-forward" style={styles.cardArrow} />
-      </TouchableOpacity>
+
+        {/* Cards */}
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => handlePress("mail")}
+        >
+          <View style={styles.cardLeft}>
+            <Ionicons name="mail-outline" style={styles.cardIcon} />
+            <Text style={styles.iconText}>Mail</Text>
+          </View>
+          <Text style={styles.cardMiddleText}>Mail Support</Text>
+          <Ionicons name="chevron-forward" style={styles.cardArrow} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => handlePress("whatsapp")}
+        >
+          <View style={styles.cardLeft}>
+            <Ionicons name="logo-whatsapp" style={styles.cardIcon} />
+            <Text style={styles.iconText}>WhatsApp</Text>
+          </View>
+          <Text style={styles.cardMiddleText}>WhatsApp Support</Text>
+          <Ionicons name="chevron-forward" style={styles.cardArrow} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => handlePress("call")}
+        >
+          <View style={styles.cardLeft}>
+            <Ionicons name="call-outline" style={styles.cardIcon} />
+            <Text style={styles.iconText}>Call</Text>
+          </View>
+          <Text style={styles.cardMiddleText}>Call Support</Text>
+          <Ionicons name="chevron-forward" style={styles.cardArrow} />
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 };
@@ -82,7 +105,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F5F5F5",
-    alignItems: "center",
   },
   header: {
     height: 150,
@@ -103,12 +125,17 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
   },
+  scrollContainer: {
+    flex: 1,
+    width: "100%",
+  },
   iconPlaceholder: {
     width: 99.5,
     height: 128.73,
     marginTop: 35,
     alignItems: "center",
     justifyContent: "center",
+    alignSelf: "center",
   },
   futureIcon: {
     width: 99.5,
@@ -117,6 +144,7 @@ const styles = StyleSheet.create({
   },
   wrapContact: {
     justifyContent: "center",
+    alignItems: "center",
     marginTop: 20,
   },
   contactText: {
@@ -125,7 +153,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   card: {
-    width: 361,
+    width: "90%",
     height: 108,
     backgroundColor: "white",
     flexDirection: "row",
@@ -135,6 +163,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 3,
     justifyContent: "space-between",
+    alignSelf: "center",
   },
   cardLeft: {
     flexDirection: "column",

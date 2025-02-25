@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  DeviceEventEmitter, // Corrected import
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { CommonActions, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,6 +19,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import AccountButtons from "../components/AccountButtons";
+import { requestCameraPermission } from "../screen/CameraScreen";
 
 const AccountScreen = ({ setIsLoggedIn }) => {
   const navigation = useNavigation();
@@ -25,17 +36,12 @@ const AccountScreen = ({ setIsLoggedIn }) => {
         const storedName = await AsyncStorage.getItem("userName");
         const storedEmail = await AsyncStorage.getItem("userEmail");
         const storedImage = await AsyncStorage.getItem("profileImage");
-        const hasImage = await AsyncStorage.getItem("profileImage");
 
         setUsername(storedName || "Guest");
         setEmail(storedEmail || "guest@example.com");
 
-        if (hasImage === "true") {
-          setProfileImage(require("../assets/Ellipse2.png"));
-        } else if (storedImage) {
+        if (storedImage) {
           setProfileImage({ uri: storedImage });
-        } else {
-          setProfileImage(require("../assets/Ellipse2.png"));
         }
 
         slideUp.value = withSpring(0, { damping: 12 });
@@ -43,22 +49,82 @@ const AccountScreen = ({ setIsLoggedIn }) => {
         console.error("Error fetching user data:", error);
       }
     };
+
     const unsubscribe = navigation.addListener("focus", fetchUserData);
     fetchUserData();
     return unsubscribe;
   }, [navigation]);
 
+  // Function to update profile image and emit an event
+  const updateProfileImage = async (newImageUri) => {
+    try {
+      await AsyncStorage.setItem("profileImage", newImageUri);
+      DeviceEventEmitter.emit("profileUpdated", newImageUri);
+    } catch (error) {
+      console.error("Error updating profile image:", error);
+    }
+  };
+
+  // Open Camera to Capture Image
+  const openCamera = async () => {
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) {
+      Alert.alert("Permission Denied", "Camera permission is required.");
+      return;
+    }
+
+    const options = { mediaType: "photo", quality: 1 }; // Defined options
+
+    launchCamera(options, async (response) => {
+      if (response.didCancel) {
+        Alert.alert("Camera", "User cancelled camera");
+      } else if (response.errorMessage) {
+        Alert.alert("Camera Error", response.errorMessage);
+      } else {
+        const newImage = response.assets[0].uri;
+        setProfileImage({ uri: newImage });
+        updateProfileImage(newImage);
+      }
+    });
+  };
+
+  // Open Gallery to Select Image
+  const openGallery = async () => {
+    const options = { mediaType: "photo", quality: 1 };
+
+    launchImageLibrary(options, async (response) => {
+      if (response.didCancel) {
+        Alert.alert("Gallery", "User cancelled image selection");
+      } else if (response.errorMessage) {
+        Alert.alert("Gallery Error", response.errorMessage);
+      } else {
+        const newImage = response.assets[0].uri;
+        setProfileImage({ uri: newImage });
+        updateProfileImage(newImage);
+      }
+    });
+  };
+
+  // Show Options (Camera or Gallery)
+  const showImageOptions = () => {
+    Alert.alert(
+      "Profile Picture",
+      "Choose an option",
+      [
+        { text: "Take Photo", onPress: openCamera },
+        { text: "Choose from Gallery", onPress: openGallery },
+        { text: "Cancel", style: "cancel" },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: slideUp.value }],
   }));
 
-  // const handleMyStatus = () => navigation.navigate("MyStatus");
-  // const handleSettings = () => navigation.navigate("Settings");
-  const handleHelp = () =>
-    Alert.alert("Help", "For support, contact support@example.com");
   const handleLogout = async () => {
     try {
-      // await AsyncStorage.clear();
       Alert.alert("Success", "Logged out successfully!", [
         { text: "OK", onPress: () => setIsLoggedIn(false) },
       ]);
@@ -70,9 +136,19 @@ const AccountScreen = ({ setIsLoggedIn }) => {
   return (
     <View style={styles.container}>
       <View style={styles.profileContainer}>
-        <Image source={profileImage} style={styles.profileImage} />
+        {/* Profile Image with Camera Icon */}
+        <View style={styles.imageWrapper}>
+          <Image source={profileImage} style={styles.profileImage} />
+          <TouchableOpacity
+            style={styles.cameraIcon}
+            onPress={showImageOptions}
+          >
+            <Ionicons name="camera-outline" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+
         <Text style={styles.username}>Hello {username}</Text>
-        <Text style={styles.email}> Your Email- {email}</Text>
+        <Text style={styles.email}>Your Email - {email}</Text>
       </View>
 
       <Animated.View style={[styles.listContainer, animatedStyle]}>
@@ -125,6 +201,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
+  imageWrapper: {
+    position: "relative",
+  },
   profileImage: {
     width: 120,
     height: 120,
@@ -133,10 +212,24 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
     backgroundColor: "#eee",
   },
+  cameraIcon: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#007AFF",
+    width: 35,
+    height: 35,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "white",
+  },
   username: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#000",
+    marginTop: 10,
   },
   email: {
     fontSize: 16,

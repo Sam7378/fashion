@@ -7,36 +7,29 @@ import {
   StyleSheet,
   Animated,
   Easing,
-  Platform,
   Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 const AddressScreen = () => {
   const navigation = useNavigation();
   const [address, setAddress] = useState({
+    fullName: "",
     street: "",
     city: "",
     state: "",
     pinCode: "",
     phoneNumber: "",
-    dob: new Date(),
   });
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [animation] = useState(new Animated.Value(0));
 
   useEffect(() => {
     const loadAddress = async () => {
       const savedAddress = await AsyncStorage.getItem("userAddress");
       if (savedAddress) {
-        let parsedAddress = JSON.parse(savedAddress);
-        setAddress({
-          ...parsedAddress,
-          dob: parsedAddress.dob ? new Date(parsedAddress.dob) : new Date(),
-        });
+        setAddress(JSON.parse(savedAddress));
       }
     };
     loadAddress();
@@ -50,18 +43,23 @@ const AddressScreen = () => {
   }, []);
 
   const handleSubmit = async () => {
-    await AsyncStorage.setItem("userAddress", JSON.stringify(address));
+    await AsyncStorage.removeItem("userAddress"); // Clear existing data
+    await AsyncStorage.setItem("userAddress", JSON.stringify(address)); // Save new data
+
     Alert.alert("Success", "Address saved successfully!");
-    navigation.navigate("Account", { updated: true });
-    // navigation.navigate("Order", { updated: true });
+
+    // Reset state
     setAddress({
+      fullName: "",
       street: "",
       city: "",
       state: "",
       pinCode: "",
       phoneNumber: "",
-      dob: new Date(),
     });
+
+    // Navigate to Home with params to trigger re-render
+    navigation.navigate("Home", { updated: true });
   };
 
   return (
@@ -81,6 +79,12 @@ const AddressScreen = () => {
       >
         <Text style={styles.subHeader}>Please fill in the following</Text>
 
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          value={address.fullName}
+          onChangeText={(text) => setAddress({ ...address, fullName: text })}
+        />
         <TextInput
           style={styles.input}
           placeholder="Street"
@@ -122,28 +126,6 @@ const AddressScreen = () => {
           }}
         />
 
-        <TouchableOpacity
-          style={styles.datePicker}
-          onPress={() => setShowDatePicker(true)}
-        >
-          <Ionicons name="calendar-outline" size={24} color="#007AFF" />
-          <Text style={styles.dateText}>
-            {address.dob ? address.dob.toDateString() : "Select Date"}
-          </Text>
-        </TouchableOpacity>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={address.dob}
-            mode="date"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            onChange={(event, selectedDate) => {
-              setShowDatePicker(false);
-              if (selectedDate) setAddress({ ...address, dob: selectedDate });
-            }}
-          />
-        )}
-
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Submit</Text>
         </TouchableOpacity>
@@ -160,7 +142,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#007AFF",
     height: 80,
-
     marginBottom: 10,
   },
   backButton: {
@@ -197,20 +178,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     marginBottom: 10,
     fontSize: 16,
-  },
-  datePicker: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: "white",
-    marginBottom: 10,
-  },
-  dateText: {
-    fontSize: 16,
-    marginLeft: 10,
   },
   button: {
     backgroundColor: "#007AFF",

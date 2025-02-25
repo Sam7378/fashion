@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,41 +8,61 @@ import {
   Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import MenuItem from "../components/MenuItem";
 import ShareModal from "../components/ShareModal";
+import { EventEmitter } from "react-native";
+import { DeviceEventEmitter } from "react-native";
 
 const CustomDrawer = ({ onLogout }) => {
   const navigation = useNavigation();
   const [userName, setUserName] = useState("Guest");
-  const [userImage, setUserImage] = useState(require("../assets/Ellipse2.png"));
+  const [profileImage, setProfileImage] = useState(
+    require("../assets/woman.png")
+  );
   const [modalVisible, setModalVisible] = useState(false);
 
-  const fetchUserName = async () => {
+  // Function to fetch user data from AsyncStorage
+  const fetchUserData = async () => {
     try {
       const storedName = await AsyncStorage.getItem("userName");
+      const storedImage = await AsyncStorage.getItem("profileImage");
+
       setUserName(storedName || "Guest");
+      if (storedImage) {
+        setProfileImage({ uri: storedImage });
+      }
     } catch (error) {
-      console.log("Error fetching username:", error);
+      console.log("Error fetching user data:", error);
     }
   };
 
-  useEffect(() => {
-    fetchUserName();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserData();
+
+      // Listen for profile update event
+      const subscription = DeviceEventEmitter.addListener(
+        "profileUpdated",
+        (newImageUri) => {
+          setProfileImage({ uri: newImageUri });
+        }
+      );
+
+      return () => subscription.remove();
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
-      {/* Header Section */}
       <View style={styles.header}>
         <TouchableOpacity>
-          <Image source={userImage} style={styles.profileImage} />
+          <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
-        <Text style={styles.username}>Hello {userName}</Text>
+        <Text style={styles.username}>Hello, {userName}</Text>
       </View>
 
-      {/* Navigation Menu */}
       <View style={styles.menuContainer}>
         <MenuItem
           icon="home"
@@ -100,7 +120,6 @@ const CustomDrawer = ({ onLogout }) => {
           onPress={() => navigation.navigate("TermsAndConditions")}
         />
 
-        {/* Logout Button */}
         <TouchableOpacity
           style={[styles.menuItem, styles.logoutButton]}
           onPress={() =>
@@ -117,7 +136,6 @@ const CustomDrawer = ({ onLogout }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Share Modal */}
       <ShareModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -133,11 +151,12 @@ const styles = StyleSheet.create({
     backgroundColor: "blue",
     height: 150,
     alignItems: "center",
+    paddingHorizontal: 20,
   },
   profileImage: {
     width: 100,
     height: 100,
-    borderRadius: 35,
+    borderRadius: 50,
     borderWidth: 2,
     borderColor: "white",
   },

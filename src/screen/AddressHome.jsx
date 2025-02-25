@@ -8,7 +8,8 @@ import {
   Image,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "react-native-vector-icons/Foundation";
+import { useFocusEffect } from "@react-navigation/native";
 
 const AddressHome = ({ scrollY }) => {
   const [address, setAddress] = useState(null);
@@ -16,19 +17,22 @@ const AddressHome = ({ scrollY }) => {
   const slideAnim = useRef(new Animated.Value(300)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  useEffect(() => {
-    const fetchAddress = async () => {
-      const storedAddress = await AsyncStorage.getItem("userAddress");
-      if (storedAddress) {
-        try {
-          setAddress(JSON.parse(storedAddress));
-        } catch (error) {
-          console.error("Error parsing address:", error);
+  // Fetch address when screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchAddress = async () => {
+        const storedAddress = await AsyncStorage.getItem("userAddress");
+        if (storedAddress) {
+          try {
+            setAddress(JSON.parse(storedAddress));
+          } catch (error) {
+            console.error("Error parsing address:", error);
+          }
         }
-      }
-    };
-    fetchAddress();
-  }, []);
+      };
+      fetchAddress();
+    }, [])
+  );
 
   useEffect(() => {
     if (!scrollY) return;
@@ -118,12 +122,12 @@ const AddressHome = ({ scrollY }) => {
             >
               Your Address
             </Text>
+            <Text>Full Name: {address?.fullName}</Text>
             <Text>Street: {address?.street}</Text>
             <Text>City: {address?.city}</Text>
             <Text>State: {address?.state}</Text>
             <Text>Pincode: {address?.pinCode}</Text>
             <Text>Phone: {address?.phoneNumber}</Text>
-            <Text>DOB: {address?.dob}</Text>
 
             <TouchableOpacity
               onPress={toggleModal}

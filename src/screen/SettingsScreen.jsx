@@ -43,17 +43,17 @@ const SettingsScreen = () => {
         <SettingsButton
           icon="lock-closed-outline"
           text="Privacy Policy"
-          onPress={() => navigation.navigate("PrivacyPolicyScreen")}
+          onPress={() => navigation.navigate("Policy")}
         />
         <SettingsButton
           icon="chatbubble-ellipses-outline"
           text="Feedback"
-          onPress={() => navigation.navigate("FeedbackScreen")}
+          onPress={() => navigation.navigate("Feedback")}
         />
         <SettingsButton
-          icon="share-social-outline"
-          text="Share App"
-          onPress={() => console.log("Share App")}
+          icon="help-outline"
+          text="Help & Support"
+          onPress={() => navigation.navigate("Help")}
         />
       </Animated.View>
     </View>
