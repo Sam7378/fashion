@@ -4,15 +4,16 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 import React, { useContext } from "react";
 import LinearGradient from "react-native-linear-gradient";
-import Header from "../components/Header";
 import CartCard from "../components/CartCard";
 import { fonts } from "../utils/fonts";
 import { CartContext } from "../context/CartContext";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const CartScreen = () => {
   const { cartItems, deleteCartItem, totalPrice, clearCart } =
@@ -29,7 +30,7 @@ const CartScreen = () => {
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
-      alert("Your cart is empty!");
+      Alert.alert("Your cart is empty!");
       return;
     }
 
@@ -37,15 +38,12 @@ const CartScreen = () => {
       id: new Date().getTime(),
       items: cartItems,
       totalPrice: totalPrice,
-      address: "User's saved address", // Update with actual address logic
     };
 
     try {
       await AsyncStorage.setItem("orderDetails", JSON.stringify(orderDetails));
-
       clearCart();
-
-      // navigation.navigate("Payment", { totalPrice });
+      navigation.navigate("Payment", { cartItems, totalPrice });
     } catch (error) {
       console.error("Error saving order:", error);
     }
@@ -54,46 +52,47 @@ const CartScreen = () => {
   return (
     <LinearGradient colors={["#f0d58b", "#edede9"]} style={styles.container}>
       <View style={styles.header}>
-        <Header isCart={true} />
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
       </View>
-      <FlatList
-        data={cartItems}
-        renderItem={({ item }) => (
-          <CartCard item={item} handleDelete={handleDeleteItem} />
-        )}
-        keyExtractor={(item) => item.id.toString()}
-        windowSize={5}
-        initialNumToRender={10}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ marginTop: 40, paddingBottom: 100 }}
-        ListFooterComponent={
-          <>
-            <View style={styles.bottomContentContainer}>
-              <View style={styles.flexRowContainer}>
-                <Text style={styles.titleText}>Total:</Text>
-                <Text style={styles.priceText}>₹{totalPrice}</Text>
+
+      {cartItems.length === 0 ? (
+        <Text style={styles.emptyCartText}>Your cart is empty</Text>
+      ) : (
+        <FlatList
+          data={cartItems}
+          renderItem={({ item }) => (
+            <CartCard item={item} handleDelete={handleDeleteItem} />
+          )}
+          keyExtractor={(item) => item.id.toString()}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ marginTop: 40, paddingBottom: 100 }}
+          ListFooterComponent={
+            <>
+              <View style={styles.bottomContentContainer}>
+                <View style={styles.flexRowContainer}>
+                  <Text style={styles.titleText}>Total:</Text>
+                  <Text style={styles.priceText}>₹{totalPrice}</Text>
+                </View>
+                <View style={styles.divider} />
+                <View style={styles.flexRowContainer}>
+                  <Text style={styles.titleText}>Grand Total:</Text>
+                  <Text style={[styles.priceText, styles.grandPriceText]}>
+                    ₹{totalPrice}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.flexRowContainer}>
-                <Text style={styles.titleText}>Shipping:</Text>
-                <Text style={styles.priceText}>₹0.0</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.flexRowContainer}>
-                <Text style={styles.titleText}>Grand Total:</Text>
-                <Text style={[styles.priceText, styles.grandPriceText]}>
-                  ₹{totalPrice}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("Pament", { totalPrice })}
-            >
-              <Text style={styles.buttonText}>Checkout</Text>
-            </TouchableOpacity>
-          </>
-        }
-      />
+              <TouchableOpacity style={styles.button} onPress={handleCheckout}>
+                <Text style={styles.buttonText}>Checkout</Text>
+              </TouchableOpacity>
+            </>
+          }
+        />
+      )}
     </LinearGradient>
   );
 };
@@ -105,7 +104,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 15,
   },
-  header: {},
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backButton: {
+    padding: 10,
+  },
   flexRowContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -148,5 +153,11 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "700",
     fontFamily: fonts.regular,
+  },
+  emptyCartText: {
+    fontSize: 18,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 50,
   },
 });

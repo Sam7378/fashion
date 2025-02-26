@@ -20,7 +20,7 @@ import OrderScreen from "./src/screen/OrderScreen";
 import HelpSupportScreen from "./src/screen/HelpSupportScreen";
 import AddressScreen from "./src/screen/AddressScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import PaymentScreen from "./src/screen/PamentScreen";
+import PaymentScreen from "./src/screen/PaymentScreen";
 import FeedbackScreen from "./src/screen/FeedbackScreen";
 import NotificationScreen from "./src/screen/NoticicationScreen";
 import ShareModal from "./src/components/ShareModal";
@@ -193,7 +193,7 @@ const App = () => {
             <Stack.Screen name="Order" component={OrderScreen} />
             <Stack.Screen name="Help" component={HelpSupportScreen} />
             <Stack.Screen name="Address" component={AddressScreen} />
-            <Stack.Screen name="Pament" component={PaymentScreen} />
+            <Stack.Screen name="Payment" component={PaymentScreen} />
             <Stack.Screen name="Feedback" component={FeedbackScreen} />
             <Stack.Screen name="Notification" component={NotificationScreen} />
             <Stack.Screen name="ShareModal" component={ShareModal} />

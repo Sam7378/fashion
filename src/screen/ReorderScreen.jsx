@@ -1,32 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CartCard from "../components/CartCard";
+import { useFocusEffect } from "@react-navigation/native";
 
 const ReorderScreen = () => {
   const [reorderItems, setReorderItems] = useState([]);
   const [address, setAddress] = useState(null);
 
-  useEffect(() => {
-    const fetchReorderData = async () => {
-      // Fetch Reorder Items
-      const storedItems = await AsyncStorage.getItem("reorderItems");
-      if (storedItems) {
-        setReorderItems(JSON.parse(storedItems));
-      }
+  // Refresh when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      const fetchReorderData = async () => {
+        // Fetch Reorder Items
+        const storedItems = await AsyncStorage.getItem("reorderItems");
+        if (storedItems) {
+          setReorderItems(JSON.parse(storedItems));
+        }
 
-      // Fetch Address
-      const storedAddress = await AsyncStorage.getItem("userAddress");
-      if (storedAddress) {
-        setAddress(JSON.parse(storedAddress));
-      }
-    };
-    fetchReorderData();
-  }, []);
+        // Fetch Address
+        const storedAddress = await AsyncStorage.getItem("userAddress");
+        if (storedAddress) {
+          setAddress(JSON.parse(storedAddress));
+        }
+      };
+      fetchReorderData();
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Order Placed</Text>
+      <Text style={styles.header}>📦 Order Items</Text>
 
       {/* Display Address */}
       {address && (

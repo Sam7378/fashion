@@ -42,7 +42,6 @@ const CustomDrawer = ({ onLogout }) => {
     useCallback(() => {
       fetchUserData();
 
-      // Listen for profile update event
       const subscription = DeviceEventEmitter.addListener(
         "profileUpdated",
         (newImageUri) => {

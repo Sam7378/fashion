@@ -10,6 +10,7 @@ import {
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { FlatList } from "react-native";
 
 const paymentImages = {
   "Credit Card": require("../assets/credit.png"),
@@ -21,10 +22,11 @@ const paymentImages = {
 const PaymentScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { totalPrice = 0 } = route.params || {};
+
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState({});
   const [loading, setLoading] = useState(false);
+  const { totalPrice = 0, cartItems = [] } = route.params || [];
 
   useEffect(() => {
     const loadAddress = async () => {
@@ -40,7 +42,7 @@ const PaymentScreen = () => {
     loadAddress();
   }, []);
 
-  const handleOrder = () => {
+  const handleOrder = async () => {
     if (!selectedPayment) {
       Alert.alert("Error", "Please select a payment method.");
       return;
@@ -51,7 +53,8 @@ const PaymentScreen = () => {
       setLoading(false);
 
       const orderData = {
-        address: selectedAddress, // Ensure address is stored correctly
+        items: cartItems, // Save ordered items
+        address: selectedAddress,
         totalPrice,
         paymentMethod: selectedPayment,
       };
@@ -66,10 +69,19 @@ const PaymentScreen = () => {
       Alert.alert(
         "🎉 Payment Successful!",
         `Your payment using ${selectedPayment} was successful.`,
-        [{ text: "OK", onPress: () => navigation.navigate("Order") }]
+        [
+          {
+            text: "OK",
+            onPress: () =>
+              navigation.navigate("Order", {
+                orderDetails: orderData,
+              }),
+          },
+        ]
       );
     }, 3000);
   };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
