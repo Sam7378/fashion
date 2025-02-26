@@ -186,6 +186,7 @@ const App = () => {
                 )}
               </Stack.Screen>
             )}
+
             <Stack.Screen name="SIGNUP" component={SignUpScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />

@@ -59,7 +59,7 @@ const CustomDrawer = ({ onLogout }) => {
         <TouchableOpacity>
           <Image source={profileImage} style={styles.profileImage} />
         </TouchableOpacity>
-        <Text style={styles.username}>Hello, {userName}</Text>
+        <Text style={styles.username}>Hello {userName}</Text>
       </View>
 
       <View style={styles.menuContainer}>

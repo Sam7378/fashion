@@ -1,179 +1,67 @@
-import React, { useState } from "react";
-import {
-  Image,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, TouchableOpacity, Text } from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import { fonts } from "../utils/fonts";
 
-const Header = ({ isCart }) => {
+const Header = () => {
   const navigation = useNavigation();
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
 
-  const handleBack = () => {
-    navigation.goBack();
+  useEffect(() => {
+    fetchNotificationCount();
+  }, []);
+
+  const fetchNotificationCount = async () => {
+    const storedNotifications = await AsyncStorage.getItem("notifications");
+    if (storedNotifications) {
+      setNotificationCount(JSON.parse(storedNotifications).length);
+    }
+  };
+
+  const resetBadge = () => {
+    setNotificationCount(0); // Reset badge count
   };
 
   return (
-    <View style={styles.header}>
-      {isCart ? (
-        <TouchableOpacity
-          style={styles.appDrawerContainer}
-          onPress={handleBack}
-        >
-          <Image
-            source={require("../assets/arrowback.png")}
-            style={styles.appBackIcon}
-          />
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity
-          style={styles.appDrawerContainer}
-          onPress={() => navigation.openDrawer()}
-        >
-          <Image
-            source={require("../assets/apps.png")}
-            style={styles.appDrawerIcon}
-          />
-        </TouchableOpacity>
-      )}
-
-      {/* {isCart && <Text style={styles.titleText}>My Cart</Text>} */}
-
-      <TouchableOpacity onPress={() => navigation.navigate("ACCOUNT")}>
-        <Image
-          source={require("../assets/Ellipse2.png")}
-          style={styles.profileImage}
-        />
-      </TouchableOpacity>
-
-      {/* Modal Popup */}
-      <Modal
-        visible={isModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
+    <View
+      style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        padding: 10,
+      }}
+    >
+      {/* Bell Icon with Badge */}
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("NotificationScreen", { resetBadge })
+        }
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.closeText}>✖</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>Menu</Text>
-            {/* Add menu items here */}
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => {
-                setModalVisible(false);
-                navigation.navigate("HOME");
-              }}
-            >
-              <Text style={styles.menuText}>Home</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => {
-                setModalVisible(false);
-                navigation.navigate("CART");
-              }}
-            >
-              <Text style={styles.menuText}>My Cart</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => {
-                setModalVisible(false);
-                navigation.navigate("ACCOUNT");
-              }}
-            >
-              <Text style={styles.menuText}>Profile</Text>
-            </TouchableOpacity>
+        <Icon name="notifications" size={28} color="black" />
+        {notificationCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{notificationCount}</Text>
           </View>
-        </View>
-      </Modal>
+        )}
+      </TouchableOpacity>
     </View>
   );
 };
 
-export default Header;
-
-const styles = StyleSheet.create({
-  appDrawerContainer: {
-    backgroundColor: "white",
-    height: 44,
-    width: 44,
-    borderRadius: 22,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  appDrawerIcon: {
-    height: 30,
-    width: 30,
-  },
-  appBackIcon: {
-    height: 24,
-    width: 24,
-    marginLeft: 10,
-  },
-  profileImage: {
-    height: 44,
-    width: 44,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    height: 60,
-  },
-  titleText: {
-    fontSize: 28,
-    fontFamily: fonts.regular,
-    color: "#000000",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    width: 300,
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  closeButton: {
+const styles = {
+  badge: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    right: -6,
+    top: -3,
+    backgroundColor: "red",
+    borderRadius: 10,
+    paddingHorizontal: 5,
   },
-  closeText: {
-    fontSize: 24,
-    color: "black",
-  },
-  modalTitle: {
-    fontSize: 22,
+  badgeText: {
+    color: "white",
+    fontSize: 12,
     fontWeight: "bold",
-    marginBottom: 10,
   },
-  menuItem: {
-    padding: 10,
-    width: "100%",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
-  },
-  menuText: {
-    fontSize: 18,
-    fontWeight: "500",
-  },
-});
+};
+
+export default Header;

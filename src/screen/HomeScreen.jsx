@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Animated,
 } from "react-native";
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import LinearGradient from "react-native-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -17,13 +17,15 @@ import AddressHome from "./AddressHome";
 import Tags from "../components/Tags";
 import ProductCard from "../components/ProductCard";
 import data from "../data/data.json";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeScreen = () => {
   const [searchItem, setSearchItem] = useState("");
   const [products, setProducts] = useState(data.products);
   const navigation = useNavigation();
   const scrollY = useRef(new Animated.Value(0)).current;
-
+  const [notificationCount, setNotificationCount] = useState(0);
   const handleProductDetails = useCallback(
     (item) => {
       navigation.navigate("PRODUCT_DETAILS", { item });
@@ -46,9 +48,29 @@ const HomeScreen = () => {
     product.title.toLowerCase().includes(searchItem.toLowerCase())
   );
 
+  useEffect(() => {
+    const fetchNotificationCount = async () => {
+      try {
+        const storedNotifications = await AsyncStorage.getItem("notifications");
+        if (storedNotifications) {
+          setNotificationCount(JSON.parse(storedNotifications).length);
+        }
+      } catch (error) {
+        console.error("Error loading notifications:", error);
+      }
+    };
+
+    const focusListener = navigation.addListener(
+      "focus",
+      fetchNotificationCount
+    );
+    fetchNotificationCount();
+
+    return focusListener;
+  }, [navigation]);
+
   return (
     <LinearGradient colors={["#FDF0F3", "#FFFBFC"]} style={styles.container}>
-      {/* Header Section */}
       <View style={styles.headerContainer}>
         <TouchableOpacity
           style={styles.drawerIcon}
@@ -58,10 +80,15 @@ const HomeScreen = () => {
         </TouchableOpacity>
         <Text style={styles.headingText}>Match Your Style</Text>
         <TouchableOpacity
-          style={styles.bellIcon}
+          style={styles.notificationIcon}
           onPress={() => navigation.navigate("Notification")}
         >
-          <Ionicons name="notifications-outline" size={32} color="black" />
+          <Icon name="notifications" size={30} color="#000" />
+          {notificationCount > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{notificationCount}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -163,4 +190,18 @@ const styles = StyleSheet.create({
     height: 20,
     marginRight: 10,
   },
+  title: { fontSize: 22, fontWeight: "bold" },
+  notificationIcon: { position: "relative", padding: 10 },
+  badge: {
+    position: "absolute",
+    top: 5,
+    right: 5,
+    backgroundColor: "red",
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: { color: "#fff", fontSize: 12, fontWeight: "bold" },
 });

@@ -132,7 +132,6 @@ const AccountScreen = ({ setIsLoggedIn }) => {
       Alert.alert("Error", "Failed to logout. Please try again.");
     }
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.profileContainer}>

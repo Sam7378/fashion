@@ -86,7 +86,7 @@ const OrderScreen = () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("HOME_STACK")}
+        onPress={() => navigation.navigate("HOME")}
       >
         <Text style={styles.buttonText}>Reorders</Text>
       </TouchableOpacity>
